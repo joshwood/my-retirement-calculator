@@ -9,5 +9,8 @@ rust-version.workspace = true
 application.workspace = true
 domain.workspace = true
 
+[dev-dependencies]
+uuid.workspace = true
+
 [lints]
 workspace = true

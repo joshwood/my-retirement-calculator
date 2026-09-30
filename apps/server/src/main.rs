@@ -1,7 +1,13 @@
 use std::{net::SocketAddr, path::PathBuf};
 
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tracing_subscriber::registry()
+        .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
+        .with(tracing_subscriber::fmt::layer().json())
+        .init();
     let address = std::env::var("RETIREMENT_CALCULATOR_BIND")
         .unwrap_or_else(|_| "127.0.0.1:3000".into())
         .parse::<SocketAddr>()?;
@@ -10,7 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         PathBuf::from,
     );
     let listener = tokio::net::TcpListener::bind(address).await?;
-    println!("retirement calculator listening on http://{address}");
+    tracing::info!(event = "server_started", bind = %address);
     axum::serve(
         listener,
         server::router(assets, uuid::Uuid::new_v4().to_string()),

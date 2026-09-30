@@ -1,6 +1,1 @@
-{
-  "case": "repeated_delete",
-  "first_response_status": 204,
-  "second_response_status": 204,
-  "response_body": null
-}
+{"first":{"status":204,"body":""},"second":{"status":204,"body":""}}

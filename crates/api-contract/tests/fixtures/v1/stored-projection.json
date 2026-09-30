@@ -1,5 +1,1 @@
-{
-  "case": "stored_projection",
-  "request": {},
-  "response": "ProjectionResponse(plan_ref)"
-}
+{"contract_version":"v1","plan_ref":{"plan_id":"20000000-0000-4000-8000-000000000001","revision":1},"profile":{"current_age":40,"current_annual_income_cents":10000000,"projection_years":1},"accounts":[{"id":"10000000-0000-4000-8000-000000000001","name":"Fixture Account","account_type":"roth_ira","other_type_label":null,"starting_balance_cents":10000000,"cost_basis_cents":7000000,"annual_growth_bps":600,"annual_dividend_yield_bps":500,"contribution_allocation_bps":1000,"reinvest_dividends":true}],"years":[{"year":1,"age":41,"accounts":[{"account_id":"10000000-0000-4000-8000-000000000001","opening_balance_cents":10000000,"contribution_cents":1000000,"invested_balance_cents":11000000,"appreciation_cents":660000,"dividend_generated_cents":550000,"dividend_reinvested_cents":550000,"income_paid_cents":0,"closing_balance_cents":12210000,"cumulative_income_paid_cents":0}],"portfolio":{"opening_balance_cents":10000000,"contribution_cents":1000000,"invested_balance_cents":11000000,"appreciation_cents":660000,"dividend_generated_cents":550000,"dividend_reinvested_cents":550000,"income_paid_cents":0,"closing_balance_cents":12210000,"cumulative_income_paid_cents":0}}],"warnings":[]}

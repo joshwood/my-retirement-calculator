@@ -15,6 +15,13 @@ supported. CORS is intentionally disabled.
 - Node `22.16.0` in CI
 - Playwright `1.63.0` with Chromium for the browser smoke test
 
+The issue workspace has a self-contained toolchain under `.toolchain`. Activate
+it in a new shell before running Rust commands:
+
+```sh
+. scripts/activate-rust-toolchain.sh
+```
+
 ## Build and verify
 
 ```sh

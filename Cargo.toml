@@ -33,6 +33,8 @@ tracing-subscriber = { version = "=0.3.20", features = ["env-filter", "json"] }
 uuid = { version = "=1.16.0", features = ["v4"] }
 wasm-bindgen = "=0.2.100"
 wasm-bindgen-test = "=0.3.50"
+wasm-bindgen-futures = "=0.4.50"
+web-sys = "=0.3.77"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

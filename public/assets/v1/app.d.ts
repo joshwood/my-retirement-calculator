@@ -48,14 +48,15 @@ export interface InitOutput {
   readonly intounderlyingbytesource_start: (a: number, b: any) => void;
   readonly intounderlyingbytesource_pull: (a: number, b: any) => any;
   readonly intounderlyingbytesource_cancel: (a: number) => void;
-  readonly __externref_table_alloc: () => number;
-  readonly __wbindgen_export_1: WebAssembly.Table;
   readonly __wbindgen_exn_store: (a: number) => void;
-  readonly __wbindgen_export_3: WebAssembly.Table;
+  readonly __externref_table_alloc: () => number;
+  readonly __wbindgen_export_2: WebAssembly.Table;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
-  readonly closure20_externref_shim: (a: number, b: number, c: any) => void;
-  readonly closure37_externref_shim: (a: number, b: number, c: any, d: any) => void;
+  readonly __wbindgen_export_5: WebAssembly.Table;
+  readonly closure379_externref_shim: (a: number, b: number, c: any) => void;
+  readonly closure419_externref_shim: (a: number, b: number, c: any) => void;
+  readonly closure441_externref_shim: (a: number, b: number, c: any, d: any) => void;
   readonly __wbindgen_start: () => void;
 }
 

@@ -1,0 +1,10 @@
+{
+  "name": "retirement-calculator-browser-smoke",
+  "private": true,
+  "devDependencies": {
+    "playwright": "1.63.0"
+  },
+  "scripts": {
+    "smoke": "node scripts/browser-smoke.mjs"
+  }
+}

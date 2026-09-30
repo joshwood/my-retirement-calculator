@@ -1,0 +1,5 @@
+{
+  "case": "stateless_projection",
+  "request": "PlanInput",
+  "response": "ProjectionResponse(plan_ref=null)"
+}

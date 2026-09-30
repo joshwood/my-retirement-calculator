@@ -1,0 +1,6 @@
+{
+  "case": "update_plan",
+  "request": "UpdatePlanInput(expected_revision)",
+  "response_status": 200,
+  "response": "PlanResponse(revision+1)"
+}

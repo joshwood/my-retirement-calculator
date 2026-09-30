@@ -1,0 +1,6 @@
+{
+  "case": "create_plan",
+  "request": "PlanInput",
+  "response_status": 201,
+  "response": "PlanResponse"
+}

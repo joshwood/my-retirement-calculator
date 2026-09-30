@@ -14,12 +14,16 @@ const allowed = new Map([
   ["web", new Set(["api-contract"])],
 ]);
 
+const unexpectedPackages = [...workspace].filter((pkg) => !allowed.has(pkg));
 const actual = new Map(metadata.packages.map((pkg) => [
   pkg.name,
   new Set(pkg.dependencies.filter((dependency) => workspace.has(dependency.name)).map((dependency) => dependency.name)),
 ]));
 
 const errors = [];
+if (unexpectedPackages.length) {
+  errors.push(`unexpected workspace packages: ${unexpectedPackages.sort().join(", ")}`);
+}
 for (const [pkg, expected] of allowed) {
   const unexpected = [...(actual.get(pkg) ?? [])].filter((dependency) => !expected.has(dependency));
   if (unexpected.length) errors.push(`${pkg}: forbidden local dependencies: ${unexpected.sort().join(", ")}`);

@@ -22,6 +22,7 @@ jobs:
       - run: cargo test --workspace --all-targets
       - run: cargo test --manifest-path crates/domain/Cargo.toml
       - run: bash scripts/check-dependencies.sh
+      - run: node --test scripts/check-dependencies.test.mjs
       - uses: taiki-e/install-action@v2
         with:
           tool: wasm-bindgen-cli@0.2.100

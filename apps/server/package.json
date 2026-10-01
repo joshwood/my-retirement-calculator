@@ -1,0 +1,16 @@
+{
+  "name": "@retirement-calculator/server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": { "types": "./dist/app.d.ts", "default": "./dist/app.js" } },
+  "scripts": { "build": "tsc -b", "start": "node dist/main.js", "typecheck": "tsc -b --pretty false && tsc -p tsconfig.test.json --pretty false" },
+  "dependencies": {
+    "@fastify/static": "10.1.5",
+    "@retirement-calculator/adapters-memory": "0.1.0",
+    "@retirement-calculator/application": "0.1.0",
+    "@retirement-calculator/contracts": "0.1.0",
+    "@retirement-calculator/domain": "0.1.0",
+    "fastify": "5.12.5"
+  }
+}

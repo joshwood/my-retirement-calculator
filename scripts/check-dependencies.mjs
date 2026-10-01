@@ -1,5 +1,59 @@
 #!/usr/bin/env node
-// Reject local Cargo dependency edges outside the architecture allowlist.
+// Reject local dependency edges outside the architecture allowlist.
+
+import { readdir, readFile } from "node:fs/promises";
+
+if (process.argv.includes("--typescript")) {
+  const allowed = new Map([
+    ["@retirement-calculator/contracts", new Set()],
+    ["@retirement-calculator/domain", new Set()],
+    ["@retirement-calculator/application", new Set(["@retirement-calculator/domain"])],
+    ["@retirement-calculator/adapters-memory", new Set(["@retirement-calculator/application", "@retirement-calculator/domain"])],
+    ["@retirement-calculator/server", new Set(["@retirement-calculator/contracts", "@retirement-calculator/domain", "@retirement-calculator/application", "@retirement-calculator/adapters-memory"])],
+    ["@retirement-calculator/web", new Set(["@retirement-calculator/contracts"])],
+  ]);
+  const roots = ["packages", "apps"];
+  const manifests = (await Promise.all(roots.map(async (root) => {
+    const directories = await readdir(new URL(`../${root}/`, import.meta.url), { withFileTypes: true });
+    return Promise.all(directories.filter((entry) => entry.isDirectory()).map(async (entry) =>
+      JSON.parse(await readFile(new URL(`../${root}/${entry.name}/package.json`, import.meta.url), "utf8"))));
+  }))).flat();
+  const workspaceNames = new Set(manifests.map((manifest) => manifest.name));
+  const errors = [];
+  for (const manifest of manifests) {
+    const expected = allowed.get(manifest.name);
+    if (expected === undefined) {
+      errors.push(`unexpected TypeScript workspace package: ${manifest.name}`);
+      continue;
+    }
+    const dependencyNames = Object.keys({
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+      ...manifest.optionalDependencies,
+      ...manifest.peerDependencies,
+    });
+    const unexpected = dependencyNames.filter((name) => workspaceNames.has(name) && !expected.has(name));
+    if (unexpected.length > 0) errors.push(`${manifest.name}: forbidden local dependencies: ${unexpected.sort().join(", ")}`);
+  }
+  for (const expected of allowed.keys()) {
+    if (!workspaceNames.has(expected)) errors.push(`missing TypeScript workspace package: ${expected}`);
+  }
+  if (errors.length > 0) {
+    console.error("TypeScript dependency policy: FAILED");
+    console.error(errors.join("\n"));
+    process.exit(1);
+  }
+  console.log("TypeScript dependency policy: PASS");
+  for (const name of [...allowed.keys()].sort()) {
+    const manifest = manifests.find((entry) => entry.name === name);
+    const dependencies = Object.keys({ ...manifest?.dependencies, ...manifest?.devDependencies })
+      .filter((dependency) => workspaceNames.has(dependency)).sort().join(", ") || "(none)";
+    console.log(`  ${name} -> ${dependencies}`);
+  }
+  process.exit(0);
+}
+
+// Legacy Rust boundary check remains until the completed rewrite removes Rust.
 
 let input = "";
 for await (const chunk of process.stdin) input += chunk;

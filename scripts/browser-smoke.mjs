@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { chromium } from "playwright";
 
-const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:3000";
+const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:8080";
 const artifacts = process.env.PAPERCLIP_RUN_SCRATCH_DIR ?? "test-results/browser-smoke";
 await mkdir(artifacts, { recursive: true });
 
@@ -32,7 +32,7 @@ await page.goto(baseUrl, { waitUntil: "networkidle" });
 await page.getByRole("heading", { name: "Build a retirement scenario you can inspect." }).waitFor();
 await page.getByRole("button", { name: "Save plan" }).waitFor({ state: "visible" });
 const accountTypes = await page.locator("#account-0-type option").evaluateAll((options) => options.map((option) => option.value));
-if (accountTypes.join(",") !== "traditional_ira,roth_ira,brokerage,employer_401k,cash,other") throw new Error("account type options are incomplete");
+if (accountTypes.join(",") !== "traditional_ira,roth_ira,brokerage,employer401k,cash,other") throw new Error("account type options are incomplete");
 if (await page.locator("input:not([type=checkbox]), select").evaluateAll((fields) => fields.some((field) => !field.labels?.length))) throw new Error("an editable field has no semantic label");
 await page.locator("#account-0-type").selectOption("other");
 await page.getByLabel("Other account type").fill("Pension trust");

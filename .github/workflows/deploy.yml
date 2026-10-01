@@ -18,7 +18,7 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: actions/setup-node@v4
         with:
-          node-version: 22.16.0
+          node-version: 24.21.0
           cache: npm
       - run: cargo fmt --all -- --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
@@ -27,6 +27,7 @@ jobs:
       - run: bash scripts/check-dependencies.sh
       - run: node --test scripts/check-dependencies.test.mjs
       - run: npm ci --include=dev
+      - run: npm run verify:stage1
 
   release-build:
     runs-on: ubuntu-latest

@@ -1,10 +1,32 @@
 {
-  "name": "retirement-calculator-browser-smoke",
+  "name": "retirement-calculator",
+  "version": "0.1.0",
   "private": true,
-  "devDependencies": {
-    "playwright": "1.63.0"
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": "24.21.0",
+    "npm": "12.1.0"
   },
   "scripts": {
-    "smoke": "node scripts/browser-smoke.mjs"
+    "build": "npm run build --workspaces --if-present",
+    "check:dependencies": "node scripts/check-dependencies.mjs --typescript",
+    "lint": "eslint .",
+    "smoke": "node scripts/browser-smoke.mjs",
+    "test": "vitest run && node --test scripts/check-dependencies.test.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "verify:stage1": "npm run lint && npm run check:dependencies && npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.10.0",
+    "eslint": "10.11.0",
+    "globals": "17.13.0",
+    "playwright": "1.63.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.0",
+    "vitest": "5.0.3"
   }
 }

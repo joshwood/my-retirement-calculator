@@ -1,7 +1,13 @@
 # Retirement Calculator
 
-This repository contains a Rust retirement calculator. Axum serves the Leptos
-CSR application and its API, including liveness endpoints at
+This repository is migrating a Rust retirement calculator to Node.js and
+TypeScript. The first migration stage lives in strict native-ESM npm workspaces:
+`@retirement-calculator/contracts` owns the frozen HTTP v1 shapes and lossless
+64-bit integer JSON codec, while `@retirement-calculator/domain` owns pure
+BigInt validation and projections. The existing Rust application remains the
+behavioral baseline until later migration stages replace it.
+
+Axum currently serves the Leptos CSR application and its API, including liveness endpoints at
 `GET /api/v1/health/live` and `GET /health`.
 
 The server listens on `0.0.0.0:${PORT}`, with `PORT` defaulting to `8080`.
@@ -12,7 +18,7 @@ server listens. CORS is intentionally disabled.
 
 - Rust `1.88.0`, including `rustfmt`, `clippy`, and `wasm32-unknown-unknown`
 - `wasm-bindgen-cli` `0.2.100`
-- Node `22.16.0` in CI
+- Node `24.21.0` (Krypton LTS) and npm `12.1.0`
 - Playwright `1.63.0` with Chromium for the browser smoke test
 
 The issue workspace has a self-contained toolchain under `.toolchain`. Activate
@@ -32,10 +38,14 @@ cargo test --manifest-path crates/domain/Cargo.toml
 bash scripts/check-dependencies.sh
 node --test scripts/check-dependencies.test.mjs
 npm ci --include=dev
+npm run verify:stage1
 bash scripts/build-web.sh
 cargo build --locked --release -p server
 cargo run --locked -p server
 ```
+
+`verify:stage1` runs ESLint, dependency-boundary enforcement, strict TypeScript
+checks (including tests), focused contract/domain tests, and workspace builds.
 
 With the server running in another terminal, run `npm run smoke`. The browser
 test opens `http://127.0.0.1:8080`, exercises the calculator, and verifies the

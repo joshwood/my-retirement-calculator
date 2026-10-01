@@ -1,5 +1,48 @@
 #!/usr/bin/env node
-// Reject local Cargo dependency edges outside the architecture allowlist.
+// Reject local dependency edges outside the architecture allowlist.
+
+import { readdir, readFile } from "node:fs/promises";
+
+if (process.argv.includes("--typescript")) {
+  const allowed = new Map([
+    ["@retirement-calculator/contracts", new Set()],
+    ["@retirement-calculator/domain", new Set()],
+  ]);
+  const directories = await readdir(new URL("../packages/", import.meta.url), { withFileTypes: true });
+  const manifests = await Promise.all(directories
+    .filter((entry) => entry.isDirectory())
+    .map(async (entry) => JSON.parse(await readFile(new URL(`../packages/${entry.name}/package.json`, import.meta.url), "utf8"))));
+  const workspaceNames = new Set(manifests.map((manifest) => manifest.name));
+  const errors = [];
+  for (const manifest of manifests) {
+    const expected = allowed.get(manifest.name);
+    if (expected === undefined) {
+      errors.push(`unexpected TypeScript workspace package: ${manifest.name}`);
+      continue;
+    }
+    const dependencyNames = Object.keys({
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+      ...manifest.optionalDependencies,
+      ...manifest.peerDependencies,
+    });
+    const unexpected = dependencyNames.filter((name) => workspaceNames.has(name) && !expected.has(name));
+    if (unexpected.length > 0) errors.push(`${manifest.name}: forbidden local dependencies: ${unexpected.sort().join(", ")}`);
+  }
+  for (const expected of allowed.keys()) {
+    if (!workspaceNames.has(expected)) errors.push(`missing TypeScript workspace package: ${expected}`);
+  }
+  if (errors.length > 0) {
+    console.error("TypeScript dependency policy: FAILED");
+    console.error(errors.join("\n"));
+    process.exit(1);
+  }
+  console.log("TypeScript dependency policy: PASS");
+  for (const name of [...allowed.keys()].sort()) console.log(`  ${name} -> (none)`);
+  process.exit(0);
+}
+
+// Legacy Rust boundary check remains until the completed rewrite removes Rust.
 
 let input = "";
 for await (const chunk of process.stdin) input += chunk;

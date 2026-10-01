@@ -7,11 +7,17 @@ if (process.argv.includes("--typescript")) {
   const allowed = new Map([
     ["@retirement-calculator/contracts", new Set()],
     ["@retirement-calculator/domain", new Set()],
+    ["@retirement-calculator/application", new Set(["@retirement-calculator/domain"])],
+    ["@retirement-calculator/adapters-memory", new Set(["@retirement-calculator/application", "@retirement-calculator/domain"])],
+    ["@retirement-calculator/server", new Set(["@retirement-calculator/contracts", "@retirement-calculator/domain", "@retirement-calculator/application", "@retirement-calculator/adapters-memory"])],
+    ["@retirement-calculator/web", new Set(["@retirement-calculator/contracts"])],
   ]);
-  const directories = await readdir(new URL("../packages/", import.meta.url), { withFileTypes: true });
-  const manifests = await Promise.all(directories
-    .filter((entry) => entry.isDirectory())
-    .map(async (entry) => JSON.parse(await readFile(new URL(`../packages/${entry.name}/package.json`, import.meta.url), "utf8"))));
+  const roots = ["packages", "apps"];
+  const manifests = (await Promise.all(roots.map(async (root) => {
+    const directories = await readdir(new URL(`../${root}/`, import.meta.url), { withFileTypes: true });
+    return Promise.all(directories.filter((entry) => entry.isDirectory()).map(async (entry) =>
+      JSON.parse(await readFile(new URL(`../${root}/${entry.name}/package.json`, import.meta.url), "utf8"))));
+  }))).flat();
   const workspaceNames = new Set(manifests.map((manifest) => manifest.name));
   const errors = [];
   for (const manifest of manifests) {
@@ -38,7 +44,12 @@ if (process.argv.includes("--typescript")) {
     process.exit(1);
   }
   console.log("TypeScript dependency policy: PASS");
-  for (const name of [...allowed.keys()].sort()) console.log(`  ${name} -> (none)`);
+  for (const name of [...allowed.keys()].sort()) {
+    const manifest = manifests.find((entry) => entry.name === name);
+    const dependencies = Object.keys({ ...manifest?.dependencies, ...manifest?.devDependencies })
+      .filter((dependency) => workspaceNames.has(dependency)).sort().join(", ") || "(none)";
+    console.log(`  ${name} -> ${dependencies}`);
+  }
   process.exit(0);
 }
 

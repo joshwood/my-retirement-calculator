@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": { "outDir": "dist-types", "rootDir": "src", "tsBuildInfoFile": "dist-types/.tsbuildinfo", "jsx": "react-jsx", "lib": ["ES2024", "DOM", "DOM.Iterable"] },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "references": [{ "path": "../../packages/contracts" }]
+}

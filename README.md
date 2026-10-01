@@ -1,14 +1,14 @@
 # Retirement Calculator
 
-This repository is migrating a Rust retirement calculator to Node.js and
-TypeScript. The first migration stage lives in strict native-ESM npm workspaces:
+The Node.js/TypeScript rewrite lives in strict native-ESM npm workspaces.
 `@retirement-calculator/contracts` owns the frozen HTTP v1 shapes and lossless
-64-bit integer JSON codec, while `@retirement-calculator/domain` owns pure
-BigInt validation and projections. The existing Rust application remains the
-behavioral baseline until later migration stages replace it.
+64-bit integer JSON codec, `domain` owns pure BigInt validation/projections,
+`application` owns use cases and ports, and `adapters-memory` supplies the
+process-local repository. Fastify serves the API and React 19/Vite provides the
+client-side workflow. The Rust tree remains temporarily as the parity baseline.
 
-Axum currently serves the Leptos CSR application and its API, including liveness endpoints at
-`GET /api/v1/health/live` and `GET /health`.
+Fastify serves the React CSR application and its API, including liveness endpoints
+at `GET /api/v1/health/live` and `GET /health`.
 
 The server listens on `0.0.0.0:${PORT}`, with `PORT` defaulting to `8080`.
 Supplying a value that is not a valid `u16` causes startup to fail before the
@@ -39,9 +39,10 @@ bash scripts/check-dependencies.sh
 node --test scripts/check-dependencies.test.mjs
 npm ci --include=dev
 npm run verify:stage1
+npm run verify:stage2
 bash scripts/build-web.sh
 cargo build --locked --release -p server
-cargo run --locked -p server
+npm start
 ```
 
 `verify:stage1` runs ESLint, dependency-boundary enforcement, strict TypeScript

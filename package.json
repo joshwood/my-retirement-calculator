@@ -14,6 +14,7 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "check:dependencies": "node scripts/check-dependencies.mjs --typescript",
+    "prelint": "npm run build",
     "lint": "eslint .",
     "smoke": "node scripts/browser-smoke.mjs",
     "start": "npm run start -w @retirement-calculator/server",

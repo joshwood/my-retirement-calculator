@@ -1,7 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { chromium } from "playwright";
 
-const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:3000";
+const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:8080";
 const artifacts = process.env.PAPERCLIP_RUN_SCRATCH_DIR ?? "test-results/browser-smoke";
 await mkdir(artifacts, { recursive: true });
 

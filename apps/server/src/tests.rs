@@ -8,7 +8,7 @@ use axum::{
 use serde_json::{Value, json};
 use tower::ServiceExt;
 
-use super::{router, router_with_repository};
+use super::{bind_address, router, router_with_repository};
 
 const INSTANCE_ID: &str = "00000000-0000-4000-8000-000000000001";
 const ACCOUNT_ID: &str = "10000000-0000-4000-8000-000000000001";
@@ -26,6 +26,31 @@ fn json_request(method: &str, uri: &str, value: &Value) -> Request<Body> {
         .header("content-type", "application/json")
         .body(Body::from(serde_json::to_vec(value).expect("serialize")))
         .expect("request")
+}
+
+#[test]
+fn port_defaults_to_8080_on_all_interfaces() {
+    assert_eq!(
+        bind_address(None).expect("default address").to_string(),
+        "0.0.0.0:8080"
+    );
+}
+
+#[test]
+fn port_accepts_valid_u16() {
+    assert_eq!(
+        bind_address(Some("49152"))
+            .expect("configured address")
+            .to_string(),
+        "0.0.0.0:49152"
+    );
+}
+
+#[test]
+fn port_rejects_invalid_values() {
+    for port in ["", "not-a-port", "65536", "-1"] {
+        assert!(bind_address(Some(port)).is_err(), "accepted PORT={port:?}");
+    }
 }
 async fn json_body(response: axum::response::Response) -> Value {
     serde_json::from_slice(
@@ -214,10 +239,48 @@ async fn stored_and_stateless_projection_are_stable_and_equivalent() {
 }
 
 #[tokio::test]
+async fn health_alias_matches_liveness_without_repository_mutation() {
+    let repository = MemoryPlanRepository::new();
+    let app = router_with_repository(public_dir(), INSTANCE_ID.into(), repository.clone());
+    let alias = json_body(
+        app.clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/health")
+                    .body(Body::empty())
+                    .expect("request"),
+            )
+            .await
+            .expect("health alias"),
+    )
+    .await;
+    let liveness = json_body(
+        app.oneshot(
+            Request::builder()
+                .uri("/api/v1/health/live")
+                .body(Body::empty())
+                .expect("request"),
+        )
+        .await
+        .expect("liveness"),
+    )
+    .await;
+
+    assert_eq!(alias, liveness);
+    assert!(
+        repository
+            .shared_store()
+            .read()
+            .expect("repository lock")
+            .is_empty()
+    );
+}
+
+#[tokio::test]
 async fn health_identity_readiness_poison_and_security_headers() {
     let repository = MemoryPlanRepository::new();
     let app = router_with_repository(public_dir(), INSTANCE_ID.into(), repository.clone());
-    for route in ["/api/v1/health/live", "/api/v1/health/ready"] {
+    for route in ["/health", "/api/v1/health/live", "/api/v1/health/ready"] {
         let response = app
             .clone()
             .oneshot(

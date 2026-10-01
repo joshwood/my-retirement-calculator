@@ -1,0 +1,16 @@
+services:
+  app:
+    image: ghcr.io/joshwood/my-retirement-calculator:${IMAGE_TAG:-latest}
+    environment:
+      PORT: "8080"
+    expose:
+      - "8080"
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 1.0
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.my-retirement-calculator.rule=Host(`my-retirement-calculator.srv2019569.hstgr.cloud`)"
+      - "traefik.http.routers.my-retirement-calculator.entrypoints=websecure"
+      - "traefik.http.routers.my-retirement-calculator.tls.certresolver=letsencrypt"
+      - "traefik.http.services.my-retirement-calculator.loadbalancer.server.port=8080"

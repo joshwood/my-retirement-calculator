@@ -1,6 +1,8 @@
-//! Axum composition root for the local-only retirement calculator.
+//! Axum composition root for the retirement calculator.
 
 use std::{
+    net::{Ipv4Addr, SocketAddr, SocketAddrV4},
+    num::ParseIntError,
     path::Path,
     sync::{
         Arc,
@@ -32,6 +34,23 @@ use tower_http::{
 use uuid::Uuid;
 
 const MAX_BODY_BYTES: usize = 1024 * 1024;
+const DEFAULT_PORT: u16 = 8080;
+
+/// Resolves the public listen address from an optional `PORT` value.
+///
+/// Parsing happens before the listener is created so an invalid value fails
+/// startup instead of silently falling back to the default.
+///
+/// # Errors
+///
+/// Returns a parsing error when `port` is not a valid `u16`.
+pub fn bind_address(port: Option<&str>) -> Result<SocketAddr, ParseIntError> {
+    let port = port.map_or(Ok(DEFAULT_PORT), str::parse::<u16>)?;
+    Ok(SocketAddr::V4(SocketAddrV4::new(
+        Ipv4Addr::UNSPECIFIED,
+        port,
+    )))
+}
 
 #[derive(Debug, Default)]
 struct Metrics {
@@ -78,6 +97,7 @@ pub fn router_with_repository(
         .route("/api/v1/plans/{plan_id}", get(get_plan).put(update_plan).delete(delete_plan))
         .route("/api/v1/plans/{plan_id}/projections", post(project_stored))
         .route("/api/v1/projections", post(project_stateless))
+        .route("/health", get(live))
         .route("/api/v1/health/live", get(live))
         .route("/api/v1/health/ready", get(ready))
         .route("/metrics", get(metrics))
